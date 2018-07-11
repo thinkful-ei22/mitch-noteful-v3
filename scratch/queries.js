@@ -55,9 +55,9 @@ const Note = require('../models/note');
 //   .then(() => {
 //     const newNote = {
 //       title: 'JUMANJI',
-//       content: 'I\'ve seen things you\'ve only seen in your nightmares. Things you can\'t even imagine; things you can\'t even see. 
-//       There are things that hunt you in the night. Then something screams. 
-//       Then you hear them eating, and you hope to god that you\'re not dessert. Afraid? You don\'t even know what afraid is.'
+//       content: 'I\'ve seen things you\'ve only seen in your nightmares. Things you can\'t even imagine; things you can\'t even see. ' + 
+//       'There are things that hunt you in the night. Then something screams. ' +
+//       'Then you hear them eating, and you hope to god that you\'re not dessert. Afraid? You don\'t even know what afraid is.'
 //     };
 
 //     return Note.create(newNote);
@@ -73,7 +73,7 @@ const Note = require('../models/note');
 //     console.error(err);
 //   });
 
-// Update a note by id using Note.findByIdAndUpdate
+//Update a note by id using Note.findByIdAndUpdate
 // mongoose.connect(MONGODB_URI)
 //   .then(() => {
 //     const id = '000000000000000000000007';
