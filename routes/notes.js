@@ -8,29 +8,23 @@ const router = express.Router();
 
 /* ========== GET/READ ALL ITEMS ========== */
 router.get('/', (req, res, next) => {
-  mongoose.connect(MONGODB_URI)
-    .then(() => {
-      const searchTerm = req.query.searchTerm;
-      let filter = {};
+  const searchTerm = req.query.searchTerm;
+  let filter = {};
 
-      if (searchTerm) {
-        filter.$or = [
-          { title: { $regex: searchTerm } },
-          { content: { $regex: searchTerm } }
-        ];
-      }
+  if (searchTerm) {
+    filter.$or = [
+      { title: { $regex: searchTerm } },
+      { content: { $regex: searchTerm } }
+    ];
+  }
 
-      return Note.find(filter).sort({ updatedAt: 'desc' });
-    })
+  Note.find(filter).sort({ updatedAt: 'desc' })
     .then(results => {
       if (results) {
         res.json(results);
       } else {
         next();
       }
-    })
-    .then(() => {
-      return mongoose.disconnect();
     })
     .catch(err => {
       next(err);
@@ -39,21 +33,15 @@ router.get('/', (req, res, next) => {
 
 /* ========== GET/READ A SINGLE ITEM ========== */
 router.get('/:id', (req, res, next) => {
-  mongoose.connect(MONGODB_URI)
-    .then(() => {
-      const id = req.params.id;
+  const id = req.params.id;
 
-      return Note.findById(id);
-    })
+  Note.findById(id)
     .then(results => {
       if (results) {
         res.json(results);
       } else {
         next();
       }
-    })
-    .then(() => {
-      return mongoose.disconnect();
     })
     .catch(err => {
       next(err);
@@ -62,27 +50,21 @@ router.get('/:id', (req, res, next) => {
 
 /* ========== POST/CREATE AN ITEM ========== */
 router.post('/', (req, res, next) => {
-  mongoose.connect(MONGODB_URI)
-    .then(() => {
-      const newNote = {
-        title: req.body.title,
-        content: req.body.content
-      };
+  const newNote = {
+    title: req.body.title,
+    content: req.body.content
+  };
 
-      /***** Never trust users - validate input *****/
-      if (!newNote.title) {
-        const err = new Error('Missing `title` in request body');
-        err.status = 400;
-        return next(err);
-      }
+  /***** Never trust users - validate input *****/
+  if (!newNote.title) {
+    const err = new Error('Missing `title` in request body');
+    err.status = 400;
+    return next(err);
+  }
 
-      return Note.create(newNote);
-    })
+  Note.create(newNote)
     .then(response => {
       res.location(`http://${req.headers.host}/notes/${response.id}`).status(201).json(response);
-    })
-    .then(() => {
-      return mongoose.disconnect();
     })
     .catch(err => {
       next(err);
@@ -91,34 +73,28 @@ router.post('/', (req, res, next) => {
 
 /* ========== PUT/UPDATE A SINGLE ITEM ========== */
 router.put('/:id', (req, res, next) => {
-  mongoose.connect(MONGODB_URI)
-    .then(() => {
-      const id = req.params.id;
-      const updateObj = {
-        title: req.body.title,
-        content: req.body.content
-      };
-      
-      /***** Never trust users - validate input *****/
-      if (!updateObj.title) {
-        const err = new Error('Missing `title` in request body');
-        err.status = 400;
-        return next(err);
-      }
+  const id = req.params.id;
+  const updateObj = {
+    title: req.body.title,
+    content: req.body.content
+  };
+  
+  /***** Never trust users - validate input *****/
+  if (!updateObj.title) {
+    const err = new Error('Missing `title` in request body');
+    err.status = 400;
+    return next(err);
+  }
 
-      const options = { new: true };
+  const options = { new: true };
 
-      return Note.findByIdAndUpdate(id, updateObj, options);
-    })
+  Note.findByIdAndUpdate(id, updateObj, options)
     .then(result => {
       if (result) {
         res.json(result);
       } else {
         next();
       }
-    })
-    .then(() => {
-      return mongoose.disconnect();
     })
     .catch(err => {
       next(err);
@@ -127,17 +103,11 @@ router.put('/:id', (req, res, next) => {
 
 /* ========== DELETE/REMOVE A SINGLE ITEM ========== */
 router.delete('/:id', (req, res, next) => {
-  mongoose.connect(MONGODB_URI)
-    .then(() => {
-      const id = req.params.id;
+  const id = req.params.id;
 
-      return Note.findByIdAndRemove(id);
-    })
+  Note.findByIdAndRemove(id)
     .then(() => {
       res.sendStatus(204);
-    })
-    .then(() => {
-      return mongoose.disconnect();
     })
     .catch(err => {
       next(err);
