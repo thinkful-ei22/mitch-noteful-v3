@@ -5,7 +5,9 @@ const mongoose = require('mongoose');
 // schema
 const noteSchema = mongoose.Schema({
   title: { type: String, required: true },
-  content: String 
+  content: String,
+  // Add folderId to note schema
+  folderId: { type: mongoose.Schema.Types.ObjectId, ref: 'Folder'}
 });
 
 noteSchema.set('timestamps', true);
