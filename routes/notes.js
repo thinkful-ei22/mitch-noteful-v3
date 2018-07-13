@@ -8,14 +8,26 @@ const router = express.Router();
 
 /* ========== GET/READ ALL ITEMS ========== */
 router.get('/', (req, res, next) => {
-  const searchTerm = req.query.searchTerm;
+  const { searchTerm, folderId } = req.query;
   let filter = {};
 
+  if (searchTerm || folderId) {
+    filter.$and = [];
+  }
+
   if (searchTerm) {
-    filter.$or = [
-      { title: { $regex: searchTerm } },
-      { content: { $regex: searchTerm } }
-    ];
+    filter.$and.push(
+      { $or: [
+        { title: { $regex: searchTerm, $options: 'i' } },
+        { content: { $regex: searchTerm, $options: 'i' } }
+      ]}
+    );
+  }
+
+  if (folderId) {
+    filter.$and.push(
+      { folderId: folderId }
+    );
   }
 
   Note.find(filter).sort({ updatedAt: 'desc' })
@@ -52,7 +64,8 @@ router.get('/:id', (req, res, next) => {
 router.post('/', (req, res, next) => {
   const newNote = {
     title: req.body.title,
-    content: req.body.content
+    content: req.body.content,
+    folderId: req.body.folderId
   };
 
   /***** Never trust users - validate input *****/
@@ -60,6 +73,14 @@ router.post('/', (req, res, next) => {
     const err = new Error('Missing `title` in request body');
     err.status = 400;
     return next(err);
+  }
+
+  if (req.body.folderId) {
+    if (!mongoose.Types.ObjectId.isValid(req.body.folderId)) {
+      const err = new Error('The `folderId` is not valid');
+      err.status = 400;
+      return next(err);
+    }
   }
 
   Note.create(newNote)
@@ -76,7 +97,8 @@ router.put('/:id', (req, res, next) => {
   const id = req.params.id;
   const updateObj = {
     title: req.body.title,
-    content: req.body.content
+    content: req.body.content,
+    folderId: req.body.folderId
   };
   
   /***** Never trust users - validate input *****/
@@ -84,6 +106,14 @@ router.put('/:id', (req, res, next) => {
     const err = new Error('Missing `title` in request body');
     err.status = 400;
     return next(err);
+  }
+
+  if (req.body.folderId) {
+    if (!mongoose.Types.ObjectId.isValid(req.body.folderId)) {
+      const err = new Error('The `folderId` is not valid');
+      err.status = 400;
+      return next(err);
+    }
   }
 
   const options = { new: true };
