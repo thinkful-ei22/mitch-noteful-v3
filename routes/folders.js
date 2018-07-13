@@ -115,4 +115,17 @@ router.put('/:id', (req, res, next) => {
     });
 });
 
+// DELETE /FOLDERS BY ID WHICH DELETES THE FOLDER AND THE RELATED NOTES
+router.delete('/:id', (req, res, next) => {
+  const id = req.params.id;
+
+  Folder.findByIdAndRemove(id)
+    .then(() => {
+      res.sendStatus(204);
+    })
+    .catch(err => {
+      next(err);
+    });
+});
+
 module.exports = router;
