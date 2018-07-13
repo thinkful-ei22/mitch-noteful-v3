@@ -17,7 +17,7 @@ router.get('/', (req, res, next) => {
     ];
   }
 
-  Folder.find(filter).sort({ updatedAt: 'desc' })
+  Folder.find(filter).sort({ name: 'asc' })
     .then(results => {
       if (results) {
         res.json(results);
@@ -33,6 +33,12 @@ router.get('/', (req, res, next) => {
 // GET A SINGLE FOLDER BY ID
 router.get('/:id', (req, res, next) => {
   const id = req.params.id;
+
+  if(!(mongoose.Types.ObjectId.isValid(id))) {
+    const message = 'these are not the droids you are looking for';
+    console.error(message);
+    return res.status(404).send(message);
+  }
 
   Folder.findById(id)
     .then(results => {
