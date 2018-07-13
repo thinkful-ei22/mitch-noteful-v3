@@ -8,8 +8,10 @@ const app = require('../server');
 const { TEST_MONGODB_URI } = require('../config');
 
 const Note = require('../models/note');
+const Folder = require('../models/folder');
 
 const seedNotes = require('../db/seed/notes');
+const seedFolders = require('../db/seed/folders');
 
 const expect = chai.expect;
 chai.use(chaiHttp);
@@ -20,7 +22,7 @@ describe('Notes API tests', function () {
       .then(() => mongoose.connection.db.dropDatabase());
   });
   beforeEach(function() {
-    return Note.insertMany(seedNotes);
+    return Note.insertMany(seedNotes, seedFolders);
   });
   afterEach(function() {
     return mongoose.connection.db.dropDatabase();
@@ -87,7 +89,8 @@ describe('Notes API tests', function () {
     it('should create and return a new item when provided valid data', function () {
       const testData = {
         'title': 'The best article about cats ever!',
-        'content': 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor...'
+        'content': 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor...',
+        'folderId': '111111111111111111111102'
       };
 
       let res;
@@ -101,7 +104,7 @@ describe('Notes API tests', function () {
           expect(res).to.have.header('location');
           expect(res).to.be.json;
           expect(res.body).to.be.a('object');
-          expect(res.body).to.have.keys('id', 'title', 'content', 'createdAt', 'updatedAt');
+          expect(res.body).to.have.keys('id', 'title', 'content', 'createdAt', 'updatedAt', 'folderId');
           // 2) then call the database
           return Note.findById(res.body.id);
         })
@@ -131,7 +134,8 @@ describe('Notes API tests', function () {
       let data;
       const updateInfo = {
         'title': 'Homer Simpson',
-        'content': 'Homer is one of the most influential characters in the history of television, and is widely considered to be an American cultural icon.'
+        'content': 'Homer is one of the most influential characters in the history of television, and is widely considered to be an American cultural icon.',
+        'folderId': '111111111111111111111102'
       };
       return Note.findOne()
         .then((_data) => {
