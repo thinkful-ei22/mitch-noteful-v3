@@ -4,6 +4,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const { MONGODB_URI } = require('../config');
 const Folder = require('../models/folder');
+const Note = require('../models/note');
 const router = express.Router();
 
 // GET ALL /FOLDERS
@@ -119,9 +120,26 @@ router.put('/:id', (req, res, next) => {
 router.delete('/:id', (req, res, next) => {
   const id = req.params.id;
 
-  Folder.findByIdAndRemove(id)
+  /***** Never trust users - validate input *****/
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    const err = new Error('The `id` is not valid');
+    err.status = 400;
+    return next(err);
+  }
+
+  // ON DELETE SET NULL equivalent
+  const folderRemovePromise = Folder.findByIdAndRemove( id );
+  // ON DELETE CASCADE equivalent
+  // const noteRemovePromise = Note.deleteMany({ folderId: id });
+
+  const noteRemovePromise = Note.updateMany(
+    { folderId: id },
+    { $unset: { folderId: '' } }
+  );
+
+  Promise.all([folderRemovePromise, noteRemovePromise])
     .then(() => {
-      res.sendStatus(204);
+      res.status(204).end();
     })
     .catch(err => {
       next(err);
