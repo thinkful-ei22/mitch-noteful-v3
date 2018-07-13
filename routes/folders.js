@@ -71,6 +71,46 @@ router.post('/', (req, res, next) => {
       res.location(`http://${req.headers.host}/folders/${response.id}`).status(201).json(response);
     })
     .catch(err => {
+      if (err.code === 11000) {
+        err = new Error('The folder name already exists');
+        err.status = 400;
+      }
+      next(err);
+    });
+});
+
+// POST /FOLDERS BY ID TO UPDATE A FOLDER NAME
+router.put('/:id', (req, res, next) => {
+  const id = req.params.id;
+  const updateObj = {
+    name: req.body.name
+  };
+
+  // VALIDATE USER INPUT
+  if(!updateObj.name) {
+    const err = new Error('Missing `name` in request body');
+    err.status = 400;
+    return next(err);
+  }
+  if(!(mongoose.Types.ObjectId.isValid(id))) {
+    const message = 'not a valid Mongo ObjectId';
+    console.error(message);
+    return res.status(404).send(message);
+  }
+
+  Folder.findByIdAndUpdate(id, updateObj)
+    .then(result => {
+      if (result) {
+        res.json(result);
+      } else {
+        next();
+      }
+    })
+    .catch(err => {
+      if (err.code === 11000) {
+        err = new Error('The folder name already exists');
+        err.status = 400;
+      }
       next(err);
     });
 });
